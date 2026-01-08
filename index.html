@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pentru tine ❤️</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1c1c1c, #ee0979);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.card {
+    background: rgba(0,0,0,0.7);
+    border-radius: 20px;
+    padding: 25px;
+    width: 95%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+h1, h2 { font-size: 1.8em; }
+
+input[type="password"], input[type="range"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+    font-size: 1em;
+}
+
+button {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: #ff2f92;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+button:hover { background: #ff5db1; }
+
+.hidden { display: none !important; }
+
+img { width: 100%; border-radius: 12px; margin-top: 10px; }
+
+.loader {
+    border: 6px solid #444;
+    border-top: 6px solid #ff2f92;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes flyUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-150px) scale(1.5); }
+}
+
+.flying-emoji {
+    position: absolute;
+    font-size: 50px;
+    pointer-events: none;
+    animation: flyUp 1s ease-out forwards;
+}
+
+@keyframes jump {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-30px); }
+    100% { transform: translateY(0); }
+}
+
+#stickerAnim {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+#stickerAnim img {
+    width: 180px;
+    transition: transform 0.3s ease;
+}
+
+#stickerAnim img.jump { animation: jump 0.6s ease; }
+
+#final img, #finalPoze img {
+    max-width: 100%;
+    border-radius: 15px;
+    margin-top: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+#videoNoi video {
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.fade {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.fade.show {
+    opacity: 1;
+}
+
+/* Slider vertical îmbunătățit */
+#slider {
+    width: 60px;
+    height: 250px;
+    cursor: pointer;
+    writing-mode: bt-lr;
+    -webkit-appearance: none;
+    background: linear-gradient(to top, #ff2f92 0%, #444 0%);
+    border-radius: 15px;
+}
+
+#slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 60px;
+    height: 20px;
+    background: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+#slider::-moz-range-thumb {
+    width: 60px;
+    height: 20px;
+    background: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+#sliderText {
+    text-align: center;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+#procentaj {
+    font-size: 1.5em;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+<audio id="melodie" src="ThreeDaysGrace.mp4" autoplay loop></audio>
+
+<div class="card">
+
+    <!-- Ecran parola -->
+    <div id="lock">
+        <h1>🔒 Acces ultra secret</h1>
+        <p>Doar cea mai frumoasa iubita din lume stie parola</p>
+        <input type="password" id="parola" placeholder="Introdu parola">
+        <button onclick="verifica()">Deblochează ❤️</button>
+        <p id="eroare"></p>
+        <button id="hintBtn" class="hidden" onclick="afiseazaHint()">HINT 😇</button>
+    </div>
+
+    <!-- Hint -->
+    <div id="hint" class="hidden">
+        <h2>HAI DINO, STII?</h2>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+            <img src="andruti.jpeg" alt="Andruti" style="width:45%; border-radius:12px;">
+            <img src="toortitzi.png" alt="Toortitzi" style="width:45%; border-radius:12px;">
+        </div>
+        <button id="revealer" onclick="arataParola()" style="margin-top:10px;">APASA PT PAROLA</button>
+        <p id="parolaCorectaText" style="margin-top:10px; font-weight:bold;"></p>
+    </div>
+
+    <!-- Ecran alegere -->
+    <div id="alegere" class="hidden">
+        <h1>💖 Alege ce facem acum</h1>
+        <p id="mesajAlegeri"></p>
+        <button onclick="alegereCorecta(); zboaraEmoji('💖', event)">te pup mult si tu stai &lt;3</button>
+        <button onclick="alegereGresita(); zboaraEmoji('💤', event)">mergem la somn</button>
+        <button onclick="alegereGresita(); zboaraEmoji('😅', event)">ne uităm la desene</button>
+        <button onclick="alegereGresita(); zboaraEmoji('🍕', event)">te pup si tu fugi</button>
+        <div id="stickerAnim" class="hidden">
+            <img src="2.jpeg" alt="Sticker greșit">
+        </div>
+    </div>
+
+    <!-- Conținut final (video) -->
+    <div id="final" class="hidden fade">
+        <h1>❤️ La mulți ani, iubita mea andruti ❤️</h1>
+        <div id="videoNoi" class="hidden fade">
+            <video width="100%" controls>
+                <source src="noi.mp4" type="video/mp4">
+            </video>
+            <video width="100%" controls style="margin-top:10px;">
+                <source src="noi2.mp4" type="video/mp4">
+            </video>
+        </div>
+        <button id="nextPozeBtn" onclick="arataPozele()">Next</button>
+    </div>
+
+    <!-- Poze -->
+    <div id="finalPoze" class="hidden fade">
+        <h1>primul trip tughedăr</h1>
+        <div id="poze">
+            <img src="1.jpeg" alt="Sticker 1">
+            <img src="3.jpeg" alt="Sticker 2">
+            <img src="4.jpeg" alt="Sticker 3">
+            <img src="5.jpeg" alt="Sticker 4">
+            <img src="6.jpeg" alt="Sticker 5">
+            <img src="7.jpeg" alt="Sticker 6">
+        </div>
+        <button style="margin-top:15px;" onclick="startEtapaSlider()">Next</button>
+    </div>
+
+    <!-- Etapa slider -->
+    <div id="etapaSlider" class="hidden fade">
+        <h2 id="sliderText">Cat de tare te enervez uneori! Atentie! uneori.</h2>
+        <div style="display:flex; justify-content:center; align-items:center; flex-direction:column; margin-top:20px;">
+            <input type="range" id="slider" min="0" max="100" value="0" step="10" orient="vertical">
+            <p id="procentaj">0%</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const parolaCorecta = "andrutitoortitzi";
+let incercari = 0;
+
+// Porneste melodia la click daca autoplay e blocat
+document.body.addEventListener('click', function startMusic() {
+    const audio = document.getElementById('melodie');
+    audio.play();
+    document.body.removeEventListener('click', startMusic);
+});
+
+// Verifica parola
+function verifica() {
+    const parola = document.getElementById("parola").value;
+    const eroare = document.getElementById("eroare");
+
+    if (parola === parolaCorecta) {
+        document.getElementById("lock").classList.add("hidden");
+        document.getElementById("alegere").classList.remove("hidden");
+        document.getElementById("hint").classList.add("hidden");
+        document.getElementById("stickerAnim").classList.add("hidden");
+    } else {
+        incercari++;
+        eroare.innerText = "❌❌Parolă greșită❌❌";
+
+        if (incercari >= 3) {
+            document.getElementById("hintBtn").classList.remove("hidden");
+            eroare.innerText = "😅 Ai nevoie de puțin ajutor?";
+        }
+    }
+}
+
+function arataParola() {
+    document.getElementById("parolaCorectaText").innerText = "Parola corecta: " + parolaCorecta;
+}
+
+function afiseazaHint() {
+    document.getElementById("hint").classList.remove("hidden");
+}
+
+function zboaraEmoji(emoji, event) {
+    const span = document.createElement("span");
+    span.classList.add("flying-emoji");
+    span.innerText = emoji;
+    span.style.left = (event.clientX || 200) + "px";
+    span.style.top = (event.clientY || 200) + "px";
+    span.style.color = ['#ff5db1','#ffea00','#00fff0','#ff2f92'][Math.floor(Math.random()*4)];
+    document.body.appendChild(span);
+
+    setTimeout(() => { span.remove(); }, 1000);
+}
+
+function alegereCorecta() {
+    const alegereDiv = document.getElementById("alegere");
+    const finalDiv = document.getElementById("final");
+    const videoDiv = document.getElementById("videoNoi");
+
+    alegereDiv.classList.add('fade');
+    alegereDiv.classList.add('hidden');
+
+    finalDiv.classList.remove('hidden');
+    setTimeout(() => finalDiv.classList.add('show'), 50);
+
+    videoDiv.classList.remove('hidden');
+    setTimeout(() => videoDiv.classList.add('show'), 100);
+}
+
+function alegereGresita() {
+    const mesaj = document.getElementById("mesajAlegeri");
+    mesaj.innerText = "";
+
+    setTimeout(() => {
+        mesaj.innerText = "AOLOOOO, mai alege o dată!";
+
+        const sticker = document.getElementById("stickerAnim");
+        sticker.classList.remove("hidden");
+        sticker.querySelector("img").classList.add("jump");
+
+        setTimeout(() => {
+            sticker.classList.add("hidden");
+            sticker.querySelector("img").classList.remove("jump");
+        }, 1200);
+    }, 100);
+}
+
+function arataPozele() {
+    const finalDiv = document.getElementById("final");
+    const pozeDiv = document.getElementById("finalPoze");
+
+    finalDiv.classList.remove('show');
+    setTimeout(() => {
+        finalDiv.classList.add('hidden');
+
+        pozeDiv.classList.remove('hidden');
+        setTimeout(() => pozeDiv.classList.add('show'), 50);
+    }, 600);
+}
+
+function startEtapaSlider() {
+    const pozeDiv = document.getElementById("finalPoze");
+    const sliderDiv = document.getElementById("etapaSlider");
+
+    pozeDiv.classList.remove('show');
+    setTimeout(() => {
+        pozeDiv.classList.add('hidden');
+
+        sliderDiv.classList.remove('hidden');
+        setTimeout(() => sliderDiv.classList.add('show'), 50);
+    }, 600);
+}
+
+// Slider vertical
+const slider = document.getElementById("slider");
+const sliderText = document.getElementById("sliderText");
+const procentaj = document.getElementById("procentaj");
+
+slider.addEventListener('input', function() {
+    const val = parseInt(slider.value);
+    procentaj.innerText = val + "%";
+
+    let color;
+    switch(val) {
+        case 0: sliderText.innerText = "😌 Calm..."; color = "#00fff0"; break;
+        case 10: sliderText.innerText = "🙂 Un pic iritată..."; color = "#a0ff00"; break;
+        case 20: sliderText.innerText = "😬 Încep să mă enervezi!"; color = "#ffea00"; break;
+        case 30: sliderText.innerText = "😡 Serios acum..."; color = "#ff5d00"; break;
+        case 40: sliderText.innerText = "😤 Tot mai enervant!"; color = "#ff2f92"; break;
+        case 50: sliderText.innerText = "😤 Explodez curând!"; color = "#ff1493"; break;
+        case 60: sliderText.innerText = "😠 Atenție la mine!"; color = "#ff0066"; break;
+        case 70: sliderText.innerText = "😡 Sunt foarte iritat!"; color = "#ff0033"; break;
+        case 80: sliderText.innerText = "😤 Chiar mă enervez!"; color = "#ff0000"; break;
+        case 90: sliderText.innerText = "😡 Foarte furios!"; color = "#cc0000"; break;
+        case 100: sliderText.innerText = "💥 Am explodat!"; color = "#990000"; 
+                  zboaraEmoji('💥', {clientX: window.innerWidth/2, clientY: 200});
+                  break;
+        default: sliderText.innerText = "Cat de tare te enervez uneori! Atentie! uneori."; color = "#fff";
+    }
+
+    sliderText.style.color = color;
+
+    // Background progres
+    slider.style.background = `linear-gradient(to top, #ff2f92 0%, #ff2f92 ${val}%, #444 ${val}%, #444 100%)`;
+});
+</script>
+
+</body>
+</html>
